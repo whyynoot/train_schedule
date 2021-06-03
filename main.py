@@ -65,9 +65,9 @@ def get_current_time() -> int:
     date_and_time = str(datetime.datetime.now())
     time = date_and_time.split(" ", 1)[1]
     hours = int(time.split(":")[0])
-    minutes = int(time.split(":")[1])
+    minutes = time.split(":")[1]
     print(f"Current time: {hours}:{minutes}")
-    from_midnight_minutes = hours * 60 + minutes
+    from_midnight_minutes = hours * 60 + int(minutes)
     return from_midnight_minutes
 
 
@@ -76,6 +76,8 @@ def convert_time(time):
     if (int(time[1]) > 59):
         print("The wrong time is founded.")
         exit()
+    if (int(time[0]) == 0):
+        time[0] = 24
     final_time = (int(time[0])*60) + int(time[1])
     return final_time
 
@@ -97,18 +99,13 @@ def load_base():
         times = {}
         intervals = {}
         with open('routes.csv', 'rt') as f:
-            data = csv.DictReader(f, delimiter=',')
-            for lines in data:
-                if len(lines['Route']) != 0:
-                    routes.update({lines['Route']: {}})
-                    times.update({lines['Route']: []})
-                    intervals.update({lines['Route']: None})
-            f.close()
-        with open('routes.csv', 'rt') as f:
             data = csv.reader(f)
             next(data)
             for row in data:
                 if len(row[0]) != 0:
+                    routes.update({str(row[0]): {}})
+                    times.update({str(row[0]): []})
+                    intervals.update({str(row[0]): None})
                     start = convert_time(row[1])
                     finish = convert_time(row[2])
                     if (start > finish):
@@ -132,7 +129,7 @@ def main():
     time_schedule = calculate_schedule(routes, times, intervals)
     station = get_station(time_schedule)
     time = convert_time(input("Current time: "))
-    # time = get_current_time()
+    #time = get_current_time()
     search_for_train(time_schedule, station, time)
 
 
