@@ -61,14 +61,13 @@ def search_for_train(time_schedule, station, time):
                   f' destination {final_output[time][1]}, {time} min')
 
 
-def get_current_time() -> int:
+def get_current_time():
     date_and_time = str(datetime.datetime.now())
     time = date_and_time.split(" ", 1)[1]
-    hours = int(time.split(":")[0])
+    hours = time.split(":")[0]
     minutes = time.split(":")[1]
     print(f"Current time: {hours}:{minutes}")
-    from_midnight_minutes = hours * 60 + int(minutes)
-    return from_midnight_minutes
+    return time
 
 
 def convert_time(time):
@@ -76,8 +75,6 @@ def convert_time(time):
     if (int(time[1]) > 59):
         print("The wrong time is founded.")
         exit()
-    if (int(time[0]) == 0):
-        time[0] = 24
     final_time = (int(time[0])*60) + int(time[1])
     return final_time
 
@@ -109,7 +106,8 @@ def load_base():
                     start = convert_time(row[1])
                     finish = convert_time(row[2])
                     if (start > finish):
-                        finish = (24 * 60) + finish
+                        time = row[2].split(':')
+                        finish = convert_time(f"{int(time[0]) + 24}:{time[1]}")
                     times[row[0]] = [start, finish]
                     intervals[row[0]] = int(row[3])
                     for i in range(4, len(row)):
@@ -124,12 +122,33 @@ def load_base():
         print("Error on loading base! Make sure that .csv file is ok!")
         exit()
 
+def analyse_time(time):
+    try:
+        time = time.split(':')
+        if (int(time[1]) > 59):
+            print("The wrong time is founded.")
+            exit()
+        suggested_time = (int(time[0]) * 60) + int(time[1])
+        if (int(time[0]) < 10):
+            for route in times:
+                if times[route][1] > suggested_time:
+                    return convert_time(f"{int(time[0]) + 24}:{time[1]}")
+        else:
+            return suggested_time
+    except:
+        print("Wrong time!")
+        return get_time()
+
+def get_time():
+    time = input("Current time: ")
+    # 3time = get_current_time()
+    time = analyse_time(time)
+    return time
 
 def main():
     time_schedule = calculate_schedule(routes, times, intervals)
     station = get_station(time_schedule)
-    time = convert_time(input("Current time: "))
-    #time = get_current_time()
+    time = get_time()
     search_for_train(time_schedule, station, time)
 
 
