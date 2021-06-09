@@ -127,21 +127,26 @@ def analyse_time(time):
         time = time.split(':')
         if (int(time[1]) > 59):
             print("The wrong time is founded.")
-            exit()
+            return get_time()
         suggested_time = (int(time[0]) * 60) + int(time[1])
+        print(suggested_time)
         if (int(time[0]) < 10):
+            start = 0
             for route in times:
-                if times[route][1] > suggested_time:
+                if (start == 0) or (times[route][0] < start):
+                    start = times[route][0]
+                # print(f'{times[route][1]} and {times[route][0]}')
+            for route in times:
+                if (times[route][1] > suggested_time) and (start > suggested_time):
                     return convert_time(f"{int(time[0]) + 24}:{time[1]}")
-        else:
-            return suggested_time
+        return suggested_time
     except:
         print("Wrong time!")
         return get_time()
 
 def get_time():
     time = input("Current time: ")
-    # 3time = get_current_time()
+    # time = get_current_time()
     time = analyse_time(time)
     return time
 
